@@ -77,6 +77,7 @@ namespace ElderHuBossAbilities
 
         public class MonoBehaviour1 : MonoBehaviour
         {
+            public GameObject AttachedDetector;
             public void Start()
             {
                 audioSource.pitch = 1f;
@@ -89,10 +90,11 @@ namespace ElderHuBossAbilities
             public void OnTriggerEnter2D(Collider2D collision)
             {
                 Rigidbody2D rb2d;
-                /*if () 
+                //if () 
                 {
                     if (collision.gameObject.layer == (int)PhysLayers.TERRAIN)
                     {
+
                         rb2d = gameObject.GetAddComponent<Rigidbody2D>();
                         rb2d.velocity = Vector3.zero;
 
@@ -101,12 +103,12 @@ namespace ElderHuBossAbilities
                         GameManager.instance.StartCoroutine(DestroyRing());
 
                     }
-                }*/
+                }
             }
             public IEnumerator DestroyRing()
             {
                 audioSource.pitch = .85f;
-                audioSource.volume = .05f;
+                audioSource.volume = .2f;
                 var audioClip = Hu.LocateMyFSM("Attacking").GetState("Attack").GetAction<AudioPlayerOneShotSingle>(2).audioClip.Value as AudioClip;
                 audioSource.PlayOneShot(audioClip);
                 var clipland = Rings.LocateMyFSM("Control").GetState("Land").GetAction<Tk2dPlayAnimationWithEvents>(1).clipName.Value;
@@ -116,11 +118,13 @@ namespace ElderHuBossAbilities
                 gameObject.GetComponent<tk2dSpriteAnimator>().Play(clipland2);
                 yield return new WaitUntil(() => gameObject.GetComponent<tk2dSpriteAnimator>().IsPlaying(clipland2) == false);
                 GameObject.Destroy(gameObject);
+                GameObject.Destroy(AttachedDetector);
             }
         }
         public class DetectorMonobehaviour : MonoBehaviour
         {
             Rigidbody2D rb2d;
+            public GameObject AttachedRing;
             public void Start()
             {
                 
@@ -128,21 +132,30 @@ namespace ElderHuBossAbilities
             public void OnTriggerEnter2D(Collider2D collision)
             {
                 if (collision.gameObject.layer == (int)PhysLayers.ENEMIES)
-                {              
-                    GameObject ring = gameObject.transform.parent.gameObject;
-                    ring.Find("Box Up").gameObject.SetActive(false);
+                {
+                    AttachedRing.Find("Box Up").gameObject.SetActive(false);
                     var clipdown = Rings.LocateMyFSM("Control").GetState("Down").GetAction<Tk2dPlayAnimation>(0).clipName.Value;
-                    ring.GetComponent<tk2dSpriteAnimator>().Play(clipdown);
-                    ring.GetComponent<MeshRenderer>().enabled = true;
-                    ring.Find("Box Big").gameObject.SetActive(true);
-                    rb2d = ring.GetAddComponent<Rigidbody2D>();
+                    AttachedRing.GetComponent<tk2dSpriteAnimator>().Play(clipdown);
+                    AttachedRing.GetComponent<MeshRenderer>().enabled = true;
+                    AttachedRing.Find("Box Big").gameObject.SetActive(true);
+                    rb2d = AttachedRing.GetAddComponent<Rigidbody2D>();
                     rb2d.velocity = new Vector2(0, -60);
                 }
             }
         }
-
+        public List<GameObject> previousrings = new List<GameObject>();
         private void CastHuRings()
-        {          
+        {
+           
+
+            foreach (GameObject eldenring in previousrings)
+            {
+                if (eldenring != null)
+                {
+                    GameObject.Destroy(eldenring);
+                    Log("Destroyed old ring");
+                }
+            }
             PlayMakerFSM dnail = HeroController.instance.gameObject.LocateMyFSM("Dream Nail");
             dnail.RemoveTransition("Set Antic", "FINISHED");
             dnail.AddTransition("Set Antic", "FINISHED", "Set");
@@ -161,6 +174,9 @@ namespace ElderHuBossAbilities
                 exclude[x] = UnityEngine.Random.Range(-6, 6);
                 exclude[x] = exclude[x] *= 2.5f;
             }
+
+           
+
             for (float i = -15f; i <= 15; i += 2.5f)
             {             
                 if (i == exclude[0] || i == exclude[1] || i == exclude[2] || i == exclude[3] || i == exclude[4] || i == exclude[5])
@@ -168,34 +184,34 @@ namespace ElderHuBossAbilities
                 }
                 else
                 {
+
                     var ring = GameObject.Instantiate(Rings);
+                    previousrings.Add(ring);
                     GameObject.Destroy(ring.LocateMyFSM("Control"));
                     ring.SetActive(true);
                     ring.layer = (int)PhysLayers.HERO_ATTACK;
+                    ring.AddComponent<NonBouncer>() ;
                     GameObject.Destroy(ring.GetComponent<DamageHero>());
                     GameObject.Destroy(ring.GetComponentInChildren<DamageHero>());
                     GameObject.Destroy(ring.Find("Box Small").GetComponent<DamageHero>());
                     GameObject.Destroy(ring.Find("Box Big").GetComponent<DamageHero>());
                     GameObject.Destroy(ring.Find("Box Up").GetComponent<DamageHero>());
                     GameObject.Destroy(ring.Find("Box Impact").GetComponent<DamageHero>());
-                    AddDamageEnemy(ring.Find("Box Small"));
-                    AddDamageEnemy(ring.Find("Box Big"));
-                    AddDamageEnemy(ring.Find("Box Impact"));
-                    AddDamageEnemy(ring.Find("Box Up"));
-                    ring.transform.position = HeroController.instance.transform.position - new Vector3(i, -6, 0);
+                    AddDamageEnemy(ring);
+                    ring.transform.position = HeroController.instance.transform.position - new Vector3(i, -5, 0);
                     ring.AddComponent<MonoBehaviour1>();
                     GameObject detector = new();
                     detector.name = "Enemy Detector";
                     detector.gameObject.SetActive(false);
-                    detector.transform.parent = ring.transform;
                     detector.AddComponent<BoxCollider2D>();
                     detector.AddComponent<DetectorMonobehaviour>();
                     var col = detector.GetComponent<BoxCollider2D>();
-                    
+                    ring.GetComponent<MonoBehaviour1>().AttachedDetector = detector;
+                    detector.GetComponent<DetectorMonobehaviour>().AttachedRing = ring;
                     col.isTrigger = true;
-                    col.size = new Vector2(1.75f, 12);
+                    col.size = new Vector2(1.85f, 12);
                     col.gameObject.layer = (int)PhysLayers.HERO_ATTACK;
-                    detector.transform.position = ring.transform.position - new Vector3(-0.25f, 6.25f, 0);
+                    detector.transform.position = ring.transform.position - new Vector3(-0.125f, 6.25f, 0);
 
 
                     GameManager.instance.StartCoroutine(RingCoroutine(ring, detector));
