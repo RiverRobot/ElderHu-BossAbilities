@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElderHuBossAbilities", "ElderHuBossAbilities.csproj", "{BFAFFFF5-2469-4BD9-B12F-CC49A60F1D4E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{DC7DF7BC-8CD2-42BD-BC11-0CBFFD4DED2F}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFAFFFF5-2469-4BD9-B12F-CC49A60F1D4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFAFFFF5-2469-4BD9-B12F-CC49A60F1D4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFAFFFF5-2469-4BD9-B12F-CC49A60F1D4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFAFFFF5-2469-4BD9-B12F-CC49A60F1D4E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CE08AD7A-1C3B-417B-9043-6F8BC3E839AC}
+	EndGlobalSection
+EndGlobal
