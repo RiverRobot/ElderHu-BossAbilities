@@ -90,20 +90,19 @@ namespace ElderHuBossAbilities
             public void OnTriggerEnter2D(Collider2D collision)
             {
                 Rigidbody2D rb2d;
-                //if () 
+
+                if (collision.gameObject.layer == (int)PhysLayers.TERRAIN)
                 {
-                    if (collision.gameObject.layer == (int)PhysLayers.TERRAIN)
-                    {
 
-                        rb2d = gameObject.GetAddComponent<Rigidbody2D>();
-                        rb2d.velocity = Vector3.zero;
+                    rb2d = gameObject.GetAddComponent<Rigidbody2D>();
+                    rb2d.velocity = Vector3.zero;
 
-                        gameObject.Find("Box Big").gameObject.SetActive(false);
-                        gameObject.Find("Box Impact").gameObject.SetActive(true);
-                        GameManager.instance.StartCoroutine(DestroyRing());
+                    gameObject.Find("Box Big").gameObject.SetActive(false);
+                    gameObject.Find("Box Impact").gameObject.SetActive(true);
+                    GameManager.instance.StartCoroutine(DestroyRing());
 
-                    }
                 }
+                
             }
             public IEnumerator DestroyRing()
             {
@@ -175,49 +174,57 @@ namespace ElderHuBossAbilities
                 exclude[x] = exclude[x] *= 2.5f;
             }
 
-           
+
 
             for (float i = -15f; i <= 15; i += 2.5f)
-            {             
-                if (i == exclude[0] || i == exclude[1] || i == exclude[2] || i == exclude[3] || i == exclude[4] || i == exclude[5])
+            {
+                bool stoploop = false;
+                foreach (var Val in exclude)
                 {
+                    if (Val == i)
+                    {
+                        stoploop = true;
+                    }
+
                 }
-                else
+                if (stoploop)
                 {
-
-                    var ring = GameObject.Instantiate(Rings);
-                    previousrings.Add(ring);
-                    GameObject.Destroy(ring.LocateMyFSM("Control"));
-                    ring.SetActive(true);
-                    ring.layer = (int)PhysLayers.HERO_ATTACK;
-                    ring.AddComponent<NonBouncer>() ;
-                    GameObject.Destroy(ring.GetComponent<DamageHero>());
-                    GameObject.Destroy(ring.GetComponentInChildren<DamageHero>());
-                    GameObject.Destroy(ring.Find("Box Small").GetComponent<DamageHero>());
-                    GameObject.Destroy(ring.Find("Box Big").GetComponent<DamageHero>());
-                    GameObject.Destroy(ring.Find("Box Up").GetComponent<DamageHero>());
-                    GameObject.Destroy(ring.Find("Box Impact").GetComponent<DamageHero>());
-                    AddDamageEnemy(ring);
-                    ring.transform.position = HeroController.instance.transform.position - new Vector3(i, -5, 0);
-                    ring.AddComponent<MonoBehaviour1>();
-                    GameObject detector = new();
-                    detector.name = "Enemy Detector";
-                    detector.gameObject.SetActive(false);
-                    detector.AddComponent<BoxCollider2D>();
-                    detector.AddComponent<DetectorMonobehaviour>();
-                    var col = detector.GetComponent<BoxCollider2D>();
-                    ring.GetComponent<MonoBehaviour1>().AttachedDetector = detector;
-                    detector.GetComponent<DetectorMonobehaviour>().AttachedRing = ring;
-                    col.isTrigger = true;
-                    col.size = new Vector2(1.85f, 12);
-                    col.gameObject.layer = (int)PhysLayers.HERO_ATTACK;
-                    detector.transform.position = ring.transform.position - new Vector3(-0.125f, 6.25f, 0);
-
-
-                    GameManager.instance.StartCoroutine(RingCoroutine(ring, detector));
+                    continue;
                 }
-                
-                
+
+                var ring = GameObject.Instantiate(Rings);
+                previousrings.Add(ring);
+                GameObject.Destroy(ring.LocateMyFSM("Control"));
+                ring.SetActive(true);
+                ring.layer = (int)PhysLayers.HERO_ATTACK;
+                ring.AddComponent<NonBouncer>();
+                GameObject.Destroy(ring.GetComponent<DamageHero>());
+                GameObject.Destroy(ring.GetComponentInChildren<DamageHero>());
+                GameObject.Destroy(ring.Find("Box Small").GetComponent<DamageHero>());
+                GameObject.Destroy(ring.Find("Box Big").GetComponent<DamageHero>());
+                GameObject.Destroy(ring.Find("Box Up").GetComponent<DamageHero>());
+                GameObject.Destroy(ring.Find("Box Impact").GetComponent<DamageHero>());
+                AddDamageEnemy(ring);
+                ring.transform.position = HeroController.instance.transform.position - new Vector3(i, -5, 0);
+                ring.AddComponent<MonoBehaviour1>();
+                GameObject detector = new();
+                detector.name = "Enemy Detector";
+                detector.gameObject.SetActive(false);
+                detector.AddComponent<BoxCollider2D>();
+                detector.AddComponent<DetectorMonobehaviour>();
+                var col = detector.GetComponent<BoxCollider2D>();
+                ring.GetComponent<MonoBehaviour1>().AttachedDetector = detector;
+                detector.GetComponent<DetectorMonobehaviour>().AttachedRing = ring;
+                col.isTrigger = true;
+                col.size = new Vector2(1.85f, 12);
+                col.gameObject.layer = (int)PhysLayers.HERO_ATTACK;
+                detector.transform.position = ring.transform.position - new Vector3(-0.125f, 6.25f, 0);
+
+
+                GameManager.instance.StartCoroutine(RingCoroutine(ring, detector));
+
+
+
             }
 
         }
