@@ -212,6 +212,7 @@ namespace ElderHuBossAbilities
                 detector.gameObject.SetActive(false);
                 detector.AddComponent<BoxCollider2D>();
                 detector.AddComponent<DetectorMonobehaviour>();
+                detector.AddComponent<NonBouncer>();
                 var col = detector.GetComponent<BoxCollider2D>();
                 ring.GetComponent<MonoBehaviour1>().AttachedDetector = detector;
                 detector.GetComponent<DetectorMonobehaviour>().AttachedRing = ring;
